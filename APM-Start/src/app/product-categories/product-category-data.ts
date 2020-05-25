@@ -1,5 +1,5 @@
 import { ProductCategory } from './product-category';
-
+// files for retrieving product categories
 export class ProductCategoryData {
 
   static categories: ProductCategory[] = [
