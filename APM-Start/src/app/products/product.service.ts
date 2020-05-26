@@ -50,12 +50,19 @@ export class ProductService {
       products.map(product => ({ // now i push into each array and dereference with product
         ...product,
         price: product.price * 1.5,
-        category: categories.find(c => product.categoryId === c.id).name,
+        category: categories.find(c => product.categoryId === c.id).name, // in this it checks the actual products with categories to name
         searchKey: [product.productName]
       }) as Product)
     )
   )
 
+  // to get a single product detail, we can create another selectedProduct observable from the existing one
+  selectedProduct$ = this.productsWithCategories$
+      .pipe(
+        map(products => // array name
+          products.find(product => // each item
+            product.id === 5)) // passed to see if it equals 5, hard coded for now as no action stream 
+      )
 
   constructor(private http: HttpClient, private supplierService: SupplierService,
     private productCategoryService: ProductCategoryService) { } // injects HTTPclient into the service
