@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable, throwError, combineLatest } from 'rxjs';
+import { Observable, throwError, combineLatest, BehaviorSubject } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
 
 import { Product } from './product'; // we add in this import from product.ts
@@ -56,13 +56,20 @@ export class ProductService {
     )
   )
 
+  // now we need to make the filter based on user selection
+  private productSelectedSubject = new BehaviorSubject<number>(0)
+  productSelectedAction$ = this.productSelectedSubject.asObservable()
+
+
   // to get a single product detail, we can create another selectedProduct observable from the existing one
-  selectedProduct$ = this.productsWithCategories$
-      .pipe(
-        map(products => // array name
-          products.find(product => // each item
-            product.id === 5)) // passed to see if it equals 5, hard coded for now as no action stream 
-      )
+  selectedProduct$ = combineLatest([
+    this.productsWithCategories$,
+    this.productSelectedAction$
+  ]) 
+  .pipe(
+    map(([products, selectedId]) =>
+    products.find(product => product.id === selectedId))
+  )
 
   constructor(private http: HttpClient, private supplierService: SupplierService,
     private productCategoryService: ProductCategoryService) { } // injects HTTPclient into the service
@@ -71,6 +78,10 @@ bottomg part is a method to get the list of products
 - Observable<Product[] specifies the type returns by the product\
 // http get for the reutrn is set so it automatically maps to that shape
 */
+
+selectedProductChanged(selectedProductId: number): void {
+  this.productSelectedSubject.next(selectedProductId)
+}
 
 
   private fakeProduct() {
