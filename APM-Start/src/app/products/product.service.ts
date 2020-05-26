@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable, throwError, combineLatest, BehaviorSubject } from 'rxjs';
-import { catchError, tap, map } from 'rxjs/operators';
+import { Observable, throwError, combineLatest, BehaviorSubject, Subject, merge } from 'rxjs';
+import { catchError, tap, map, scan } from 'rxjs/operators';
 
 import { Product } from './product'; // we add in this import from product.ts
 import { Supplier } from '../suppliers/supplier';
 import { SupplierService } from '../suppliers/supplier.service';
 import { ProductCategoryService } from '../product-categories/product-category.service'; // auto import this 
+import { access } from 'fs';
 
 @Injectable({
   providedIn: 'root'
@@ -69,6 +70,15 @@ export class ProductService {
   .pipe(
     map(([products, selectedId]) =>
     products.find(product => product.id === selectedId))
+  )
+
+  private productInsertedSubject = new Subject<Product>();
+  productInsertedAction$ = this.productSelectedSubject.asObservable();
+
+  // need to make a new data observable which holds, the new inserted subject
+  productsWithAdd$ = merge( // auto adds
+    this.productsWithCategories$, // display category names instead of the id
+    this.productInsertedAction$
   )
 
   constructor(private http: HttpClient, private supplierService: SupplierService,
